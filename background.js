@@ -1,13 +1,15 @@
 let audioCtx;
 let streamer;
 let source;
+let nig = false;
 chrome.browserAction.setBadgeText({text: 'OFF'})
 
 chrome.extension.onConnect.addListener(function(port) {
     port.onMessage.addListener(function(msg) {
 		if (msg.action === 'start') {
 			if (!streamer) {
-                audioCtx = new window.AudioContext();
+                audioCtx = new window.AudioContext({sampleRate: 48000});
+				
                 chrome.tabCapture.capture({  // this to avoid multiple captures
                     audio: true 
                 }, function(stream) {
@@ -32,6 +34,37 @@ chrome.extension.onConnect.addListener(function(port) {
 
 					merger.connect(audioCtx.destination);
 					chrome.browserAction.setBadgeText({text: 'ON'})
+
+					function psound() {
+						//setTimeout(() => {
+							if (rightDelay.delayTime.value <= 0.025) {
+								rightDelay.delayTime.value += 0.001
+								setTimeout(psound, 200)
+							} else {
+								rightDelay.delayTime.value = 0
+								setTimeout(psound1, 200)
+							}
+						//}, 150);
+					}
+
+					function psound1() {
+						//setTimeout(() => {
+							if (leftDelay.delayTime.value <= 0.025) {
+								leftDelay.delayTime.value += 0.001
+								setTimeout(psound1, 200)
+							} else {
+								leftDelay.delayTime.value = 0
+								setTimeout(psound, 200)
+							
+							}
+						//}, 150);
+					}
+
+					setTimeout(() => {
+						psound()
+					}, 1000);
+
+				
                 });
             }
 		}
